@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.lzokks04.myweather.R;
+import com.lzokks04.myweather.util.ActivityCollector;
 
 /**
  * Created by Liu on 2016/8/13.

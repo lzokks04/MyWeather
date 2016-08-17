@@ -2,11 +2,11 @@ package com.lzokks04.myweather.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.lzokks04.myweather.R;
@@ -34,6 +34,7 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
 
     private ListView mListView;
     private CityListHelper helper;
+    private TextView tvTitle;
     private ArrayAdapter<String> adapter;
     List<CityDetailBean> cityDetailBeanList;
 
@@ -42,11 +43,13 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
     private List<String> provList;
     private List<String> cityList;
     private String cityCode;
+    private String selectProv;
 
     @Override
     public void initView() {
         setContentView(R.layout.activity_select);
         mListView = (ListView) findViewById(R.id.lv_select);
+        tvTitle = (TextView) findViewById(R.id.tv_title);
     }
 
     @Override
@@ -66,16 +69,19 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.i("onItemClick: ", "currentGetLevel=" + currentGetLevel + ",currentLevel=" + currentLevel);
         if (currentLevel == LEVEL_PROV) {
+            tvTitle.setText("省份");
             if (currentGetLevel == GET_NET){
                 cityList = getCityStringGroup(cityDetailBeanList, provList.get(i));
+                selectProv = provList.get(i);
             }else if (currentGetLevel == GET_DB){
                 cityList = helper.loadCityData(provList.get(i));
+                selectProv = provList.get(i);
             }
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, cityList);
             mListView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
+            tvTitle.setText(selectProv);
             currentLevel = LEVEL_CITY;
         } else if (currentLevel == LEVEL_CITY){
             if (currentGetLevel == GET_NET){
@@ -220,10 +226,12 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
             currentLevel = LEVEL_PROV;
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, provList);
             mListView.setAdapter(adapter);
+            tvTitle.setText("省份");
             adapter.notifyDataSetChanged();
         } else if (currentLevel == LEVEL_PROV) {
             Intent intent = new Intent(SelectActivity.this, MainActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 

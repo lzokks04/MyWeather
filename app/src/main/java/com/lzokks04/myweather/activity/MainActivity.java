@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.bean.CityWeatherBean;
 import com.lzokks04.myweather.util.API;
+import com.lzokks04.myweather.util.ActivityCollector;
 import com.lzokks04.myweather.util.NetUtil;
 import com.lzokks04.myweather.util.NetUtilBitmapCallBack;
 

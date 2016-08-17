@@ -6,6 +6,21 @@
               android:focusableInTouchMode="true"
               android:orientation="vertical">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#3f51B5">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="省份"
+            android:textSize="30sp"/>
+
+    </RelativeLayout>
+
     <ListView
         android:id="@+id/lv_select"
         android:layout_width="match_parent"

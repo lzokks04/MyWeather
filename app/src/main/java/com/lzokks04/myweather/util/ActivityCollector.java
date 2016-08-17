@@ -1,4 +1,4 @@
-package com.lzokks04.myweather.activity;
+package com.lzokks04.myweather.util;
 
 import android.app.Activity;
 
