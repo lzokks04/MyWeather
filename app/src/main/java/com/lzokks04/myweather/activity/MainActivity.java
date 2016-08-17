@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -39,16 +37,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private String changeCityCode;
 
     private long exitTime = 0;
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Bitmap bitmap = (Bitmap) msg.obj;
-            ivImage.setImageBitmap(bitmap);
-        }
-    };
-
-    private static final String URL = API.CITY_RESPONSE + "CN101020100" + API.USER_ID;
 
     @Override
     public void initView() {
@@ -203,8 +191,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getCode()
                     + API.ICON_SUFFIX, new NetUtilBitmapCallBack() {
                 @Override
-                public void onSuccess(Bitmap bitmap) {
-                    sendMessageForHandler(bitmap);
+                public void onSuccess(final Bitmap bitmap) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ivImage.setImageBitmap(bitmap);
+                        }
+                    });
                 }
 
                 @Override
@@ -225,17 +218,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         StringBuffer sb = new StringBuffer(str);
         sb.delete(0, 11);
         return sb.toString();
-    }
-
-    /***
-     * 将bitmap发送给handler并更新UI
-     *
-     * @param bitmap
-     */
-    private void sendMessageForHandler(Bitmap bitmap) {
-        Message msg = Message.obtain();
-        msg.obj = bitmap;
-        handler.sendMessage(msg);
     }
 
     /**
