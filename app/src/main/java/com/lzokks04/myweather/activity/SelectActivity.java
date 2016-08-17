@@ -234,6 +234,4 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
             finish();
         }
     }
-
-
 }

@@ -2,6 +2,7 @@ package com.lzokks04.myweather.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Window;
 
 import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.util.ActivityCollector;
@@ -14,6 +15,7 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         ActivityCollector.addActivity(this);
         initView();
         initData();
