@@ -25,6 +25,7 @@
         </activity>
         <activity
             android:name=".activity.SelectActivity"
+            android:launchMode="singleTask"
             />
     </application>
 

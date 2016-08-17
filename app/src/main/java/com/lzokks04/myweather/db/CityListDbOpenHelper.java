@@ -9,17 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class CityListDbOpenHelper extends SQLiteOpenHelper{
 
-    public static final String CREATE_CITYLIST = "create table Citylist (city varchar(20)," +
-            "cnty varchar(10)," +
-            " id varchar(15)," +
-            " lat varchar(10)," +
-            " lon varchar(10)," +
-            " prov varchar(20))";
-
-    public static final String CREATE_PROVINCE = "create table citylistinfo (id integer primary key autoincrement," +
-            " province_name text" +
-            " city_name text" +
-            " city_code text)";
+    public static final String CREATE_SQL = "create table citylistinfo (province_name text," +
+            "city_name text," +
+            "city_code text)";
 
 
 
@@ -29,8 +21,7 @@ public class CityListDbOpenHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_CITYLIST);
-        sqLiteDatabase.execSQL(CREATE_PROVINCE);
+        sqLiteDatabase.execSQL(CREATE_SQL);
     }
 
     @Override

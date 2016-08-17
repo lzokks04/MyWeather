@@ -1,12 +1,11 @@
 package com.lzokks04.myweather.bean;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Liu on 2016/8/12.
  */
-public class CityListBean implements Serializable{
+public class CityListBean{
 
     private String status;
     /**

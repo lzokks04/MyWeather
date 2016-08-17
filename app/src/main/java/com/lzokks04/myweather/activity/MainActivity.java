@@ -7,12 +7,14 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.lzokks04.myweather.R;
@@ -34,6 +36,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private TextView tvWind;//风力
     private ListView lvDetail;
     private String changeCityCode;
+
+    private long exitTime = 0;
 
     private Handler handler = new Handler() {
         @Override
@@ -188,9 +192,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             tvTitle.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity());
             tvTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp() + "°");
             tvWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt());
-            tvUptime.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getUpdate().getLoc() + "更新");
+            tvUptime.setText(getTime(cityWeatherBean.getHeWeatherdataservice().get(0)
+                    .getBasic().getUpdate().getLoc() + "更新"));
             tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
-            tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()+ ":"
+            tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir() + ":"
                     + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
 
             NetUtil.getBitmap(API.WEATHER_ICON +
@@ -210,6 +215,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
+    /**
+     * 把更新时间前的日期去掉
+     * @param str
+     * @return
+     */
+    private String getTime(String str){
+        StringBuffer sb = new StringBuffer(str);
+        sb.delete(0, 11);
+        return sb.toString();
+    }
+
     /***
      * 将bitmap发送给handler并更新UI
      *
@@ -221,4 +237,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         handler.sendMessage(msg);
     }
 
+    /**
+     * 再按一次退出的实现
+     *
+     * @param keyCode
+     * @param event
+     * @return
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                ActivityCollector.finishAll();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

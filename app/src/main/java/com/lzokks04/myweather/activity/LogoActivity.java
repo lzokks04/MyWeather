@@ -6,7 +6,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
 import com.lzokks04.myweather.R;
-import com.lzokks04.myweather.db.CityListHelper;
 
 /**
  * Created by Liu on 2016/8/13.
@@ -14,19 +13,10 @@ import com.lzokks04.myweather.db.CityListHelper;
 public class LogoActivity extends BaseActivity {
 
     private Animation anim;
-    private CityListHelper helper;
 
     @Override
     public void initView() {
         setContentView(R.layout.activity_logo);
-        helper = CityListHelper.getInstance(this);
-        loadCityInfo();
-    }
-
-    private void loadCityInfo() {
-        if (helper.loadCityList().size() < 1) {
-            helper.CityListDataDownSaveDb();
-        }
     }
 
     @Override
