@@ -1,5 +1,6 @@
 package com.lzokks04.myweather.util;
 
+import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.bean.CityDetailBean;
 import com.lzokks04.myweather.bean.CityListBean;
 
@@ -146,5 +147,116 @@ public class Utils {
         return beanList;
     }
 
+    public static int getWeatherIcon(String code){
+        switch (code){
+            case "100":
+                return R.drawable.biz_plugin_weather_qing;
+            case "101":
+                return R.drawable.biz_plugin_weather_duoyun;
+            case "102":
+                return R.drawable.biz_plugin_weather_duoyun;
+            case "103":
+                return R.drawable.biz_plugin_weather_yin;
+            case "104":
+                return R.drawable.biz_plugin_weather_yin;
+            case "200":
+                return R.drawable.biz_plugin_weather_wu;
+            case "201":
+                return R.drawable.biz_plugin_weather_wu;
+            case "202":
+                return R.drawable.biz_plugin_weather_wu;
+            case "203":
+                return R.drawable.biz_plugin_weather_wu;
+            case "204":
+                return R.drawable.biz_plugin_weather_wu;
+            case "205":
+                return R.drawable.biz_plugin_weather_wu;
+            case "206":
+                return R.drawable.biz_plugin_weather_wu;
+            case "207":
+                return R.drawable.biz_plugin_weather_wu;
+            case "208":
+                return R.drawable.biz_plugin_weather_wu;
+            case "209":
+                return R.drawable.biz_plugin_weather_wu;
+            case "210":
+                return R.drawable.biz_plugin_weather_wu;
+            case "211":
+                return R.drawable.biz_plugin_weather_wu;
+            case "212":
+                return R.drawable.biz_plugin_weather_wu;
+            case "213":
+                return R.drawable.biz_plugin_weather_wu;
+            case "300":
+                return R.drawable.biz_plugin_weather_zhenyu;
+            case "301":
+                return R.drawable.biz_plugin_weather_zhenyu;
+            case "302":
+                return R.drawable.biz_plugin_weather_leizhenyu;
+            case "303":
+                return R.drawable.biz_plugin_weather_leizhenyu;
+            case "304":
+                return R.drawable.biz_plugin_weather_leizhenyubingbao;
+            case "305":
+                return R.drawable.biz_plugin_weather_xiaoyu;
+            case "306":
+                return R.drawable.biz_plugin_weather_zhongyu;
+            case "307":
+                return R.drawable.biz_plugin_weather_dayu;
+            case "308":
+                return R.drawable.biz_plugin_weather_dayu;
+            case "309":
+                return R.drawable.biz_plugin_weather_xiaoyu;
+            case "310":
+                return R.drawable.biz_plugin_weather_baoyu;
+            case "311":
+                return R.drawable.biz_plugin_weather_dabaoyu;
+            case "312":
+                return R.drawable.biz_plugin_weather_tedabaoyu;
+            case "313":
+                return R.drawable.biz_plugin_weather_dayu;
+            case "400":
+                return R.drawable.biz_plugin_weather_xiaoxue;
+            case "401":
+                return R.drawable.biz_plugin_weather_zhongxue;
+            case "402":
+                return R.drawable.biz_plugin_weather_daxue;
+            case "403":
+                return R.drawable.biz_plugin_weather_baoxue;
+            case "404":
+                return R.drawable.biz_plugin_weather_yujiaxue;
+            case "405":
+                return R.drawable.biz_plugin_weather_yujiaxue;
+            case "406":
+                return R.drawable.biz_plugin_weather_yujiaxue;
+            case "407":
+                return R.drawable.biz_plugin_weather_yujiaxue;
+            case "500":
+                return R.drawable.biz_plugin_weather_wu;
+            case "501":
+                return R.drawable.biz_plugin_weather_wu;
+            case "502":
+                return R.drawable.biz_plugin_weather_wu;
+            case "503":
+                return R.drawable.biz_plugin_weather_wu;
+            case "504":
+                return R.drawable.biz_plugin_weather_wu;
+            case "505":
+                return R.drawable.biz_plugin_weather_wu;
+            case "506":
+                return R.drawable.biz_plugin_weather_wu;
+            case "507":
+                return R.drawable.biz_plugin_weather_shachenbao;
+            case "508":
+                return R.drawable.biz_plugin_weather_shachenbao;
+            case "900":
+                return R.drawable.biz_plugin_weather_duoyun;
+            case "901":
+                return R.drawable.biz_plugin_weather_duoyun;
+            case "999":
+                return R.drawable.ic_image_loadfail;
+        }
+        return 0;
+    }
 
 }
