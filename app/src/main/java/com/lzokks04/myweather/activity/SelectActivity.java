@@ -1,5 +1,6 @@
 package com.lzokks04.myweather.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +54,7 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
     private List<String> cityList;
     private String cityCode;
     private String selectProv;
+    private ProgressDialog progress;
 
 
     @Override
@@ -65,12 +67,12 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
     @Override
     protected void initData() {
         helper = CityListHelper.getInstance(this);
+        initProgressDialog();
         //设置listview
         initListView();
         //设置toolbar
         setToolbar();
     }
-
 
     @Override
     public void initListener() {
@@ -132,6 +134,13 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
         });
     }
 
+    private void initProgressDialog() {
+        progress = new ProgressDialog(this);
+        progress.setCancelable(false);
+        progress.setCanceledOnTouchOutside(false);
+        progress.setTitle("获取中");
+    }
+
     /**
      * 初始化ListView所需要的adapter,list
      * 如果数据库有数据则读取数据库数据
@@ -158,7 +167,7 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
      * @param apiKey
      */
     private void getCityList(String baseUrl,String cityType,String apiKey){
-
+        progress.show();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -179,11 +188,12 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
                 .subscribe(new Subscriber<List<CityDetailBean>>() {
                     @Override
                     public void onCompleted() {
-
+                        hideProgress();
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        hideProgress();
                         Log.e("mjj", e.getMessage());
                         Toast.makeText(SelectActivity.this, "操作失败！请检查网络设置!", Toast.LENGTH_SHORT).show();
                     }
@@ -204,6 +214,15 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
                         }).start();
                     }
                 });
+    }
+
+    /**
+     * 隐藏progressbar
+     */
+    private void hideProgress() {
+        if (progress != null && progress.isShowing()) {
+            progress.dismiss();
+        }
     }
 
     /**

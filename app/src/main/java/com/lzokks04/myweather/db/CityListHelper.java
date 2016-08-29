@@ -23,7 +23,7 @@ public class CityListHelper {
     /**
      * 數據庫名
      */
-    public static final String DB_NAME = "Citylist";
+    public static final String DB_NAME = "weatherdb";
     /**
      * 數據庫版本
      */
@@ -151,6 +151,8 @@ public class CityListHelper {
             values.put("wind", bean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
                     + bean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
             values.put("code", bean.getHeWeatherdataservice().get(0).getNow().getCond().getCode());
+            values.put("time",Utils.getLastTime(bean.getHeWeatherdataservice().get(0).
+                    getBasic().getUpdate().getLoc())+"更新");
             db.insert("cityweather", null, values);
         }
     }
@@ -201,6 +203,7 @@ public class CityListHelper {
                 bean.setTemp(cursor.getString(cursor.getColumnIndex("temp")));
                 bean.setWind(cursor.getString(cursor.getColumnIndex("wind")));
                 bean.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+                bean.setTime(cursor.getString(cursor.getColumnIndex("time")));
             } while (cursor.moveToNext());
         }
         return bean;

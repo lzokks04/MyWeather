@@ -18,7 +18,8 @@ public class CityListDbOpenHelper extends SQLiteOpenHelper{
             "weather text," +
             "hum text," +
             "wind text," +
-            "code text)";
+            "code text," +
+            "time text)";
 
     public static final String CREATE_DAILY = "create table dailyweather (date text," +
             "lweather text," +

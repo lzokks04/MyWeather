@@ -28,7 +28,7 @@ public class LogoActivity extends Activity {
 
     private void initData() {
         anim = new AlphaAnimation(1.0f, 0.0f);
-        anim.setDuration(6000);
+        anim.setDuration(3000);
         anim.setFillAfter(true);
     }
 

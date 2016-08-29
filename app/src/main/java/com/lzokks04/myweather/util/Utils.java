@@ -259,4 +259,18 @@ public class Utils {
         return 0;
     }
 
+    /**
+     * 去掉最后更新时间的日期
+     * @param str
+     * @return
+     */
+    public static String getLastTime(String str){
+        StringBuffer sb = new StringBuffer();
+        for(int i=0;i<str.length();i++){
+            sb.append(str.charAt(i));
+        }
+        sb.delete(0, 11);
+        return sb.toString();
+    }
+
 }

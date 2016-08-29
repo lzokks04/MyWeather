@@ -24,8 +24,8 @@
 
     <ImageView
         android:id="@+id/iv_l_weather"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
         android:layout_gravity="center"/>
 
     <TextView
@@ -50,8 +50,8 @@
 
     <ImageView
         android:id="@+id/iv_n_weather"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
         android:layout_gravity="center"/>
 
     <TextView

@@ -1,5 +1,6 @@
 package com.lzokks04.myweather.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -8,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,9 +50,12 @@ public class MainActivity extends BaseActivity {
     private TextView tvWind;//风力
     private TextView tvDayOfWeek;//今天星期几
     private TextView tvCity;//城市
+    private TextView tvLastTime;//最后更新
     private RecyclerView mRecyclerView;
     private DaliyWeatherAdapter adapter;
     private CityListHelper helper;
+    private String code;
+    private ProgressDialog progress;
 
 
     private long exitTime = 0;
@@ -60,6 +66,7 @@ public class MainActivity extends BaseActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         tvCity = (TextView) findViewById(R.id.tv_city);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        tvLastTime = (TextView) findViewById(R.id.tv_lasttime);
         ivImage = (ImageView) findViewById(R.id.iv_image);
         tvTemp = (TextView) findViewById(R.id.tv_temp);
         tvWeather = (TextView) findViewById(R.id.tv_weather);
@@ -74,18 +81,46 @@ public class MainActivity extends BaseActivity {
         tvDayOfWeek.setText(Utils.getDayOfWeek());
         helper = CityListHelper.getInstance(this);
         initToolBar();//初始化Toolbar
+        initDialog();//初始化progressDialog
         isFirstBoot();//判断app是否第一次启动
         getCityMessage();//获取citycode并从网络获取天气信息
+    }
+
+    private void initDialog() {
+        progress = new ProgressDialog(this);
+        progress.setCancelable(false);// 设置是否可以通过点击Back键取消
+        progress.setCanceledOnTouchOutside(false);// 设置在点击Dialog外是否取消Dialog进度条
+        progress.setTitle("获取中");
     }
 
     /**
      * 初始化Toolbar
      */
     private void initToolBar() {
+        setSupportActionBar(mToolbar);
         mToolbar.setTitle("天气");
         mToolbar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(mToolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_menu_white_18dp);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.refresh:
+                        getCityWeather(API.WEATHER, code, API.USER_ID);
+                        adapter.notifyDataSetChanged();
+                        break;
+                    case R.id.about:
+                        Intent i = new Intent(MainActivity.this,AboutActivity.class);
+                        startActivity(i);
+                        break;
+                    case R.id.exit:
+                        ActivityCollector.finishAll();
+                        break;
+                }
+                return true;
+            }
+
+        });
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -138,6 +173,7 @@ public class MainActivity extends BaseActivity {
     private void getCityMessage() {
         Intent intent = getIntent();
         String cityCode = intent.getStringExtra("citycode");
+        code = cityCode;
         SharedPreferences pref = getPreferences(MODE_PRIVATE);
         //从选择界面跳转过来
         if (cityCode != null) {
@@ -148,6 +184,7 @@ public class MainActivity extends BaseActivity {
             //如果SharedPreferences里有城市代号+
             if (pref.getString("citycode", null) != null) {
                 cityCode = pref.getString("citycode", null);
+                code = cityCode;
                 //如果数据库中没有数据的话
                 if (helper.loadDailyWeather().size() == 0) {
                     getCityWeather(API.WEATHER, cityCode, API.USER_ID);
@@ -155,9 +192,9 @@ public class MainActivity extends BaseActivity {
                     CityWeatherConBean bean = helper.loadCityWeather();
                     List<DailyWeather> beanList = helper.loadDailyWeather();
                     setText(null, bean);//设置文字
-                    initRecyclerView(null,beanList);
+                    initRecyclerView(null, beanList);//初始化RecyclerView
                 }
-                //没有的话强制跳转到选择城市界面
+                //如果SharedPreferences里没有城市代号
             } else {
                 Intent i = new Intent(MainActivity.this, SelectActivity.class);
                 startActivity(i);
@@ -174,6 +211,7 @@ public class MainActivity extends BaseActivity {
      * @param apiKey
      */
     private void getCityWeather(String baseURL, String cityCode, String apiKey) {
+        progress.show();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseURL)
                 //自定义的JsonConverterFactory,去除json原始数据的非法数据
@@ -189,22 +227,32 @@ public class MainActivity extends BaseActivity {
                 .subscribe(new Subscriber<CityWeatherBean>() {
                     @Override
                     public void onCompleted() {
-//                        Toast.makeText(MainActivity.this, "操作完成！", Toast.LENGTH_SHORT).show();
+                        hideProgress();
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        hideProgress();
                         Log.e("mjj", e.getMessage());
                         Toast.makeText(MainActivity.this, "操作失败！请检查网络设置!", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onNext(CityWeatherBean cityWeatherBean) {
-                        initRecyclerView(cityWeatherBean,null);//初始化RecyclerView
+                        initRecyclerView(cityWeatherBean, null);//初始化RecyclerView
                         setText(cityWeatherBean, null);//设置UI文本
                         saveInfoToDb(cityWeatherBean);//保存到数据库
                     }
                 });
+    }
+
+    /**
+     * 隐藏progressbar
+     */
+    private void hideProgress() {
+        if (progress != null && progress.isShowing()) {
+            progress.dismiss();
+        }
     }
 
     /**
@@ -240,7 +288,8 @@ public class MainActivity extends BaseActivity {
             tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
             tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
                     + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
-
+            tvLastTime.setText(Utils.getLastTime(cityWeatherBean.getHeWeatherdataservice()
+                    .get(0).getBasic().getUpdate().getLoc()) + "更新");
             Picasso.with(MainActivity.this).load(Utils.getWeatherIcon(cityWeatherBean.
                     getHeWeatherdataservice().get(0).getNow().getCond().getCode())).into(ivImage);
         } else if (cityWeatherBean == null && bean != null) {
@@ -249,6 +298,7 @@ public class MainActivity extends BaseActivity {
             tvWeather.setText(bean.getWeather());
             tvHum.setText(bean.getHum());
             tvWind.setText(bean.getWind());
+            tvLastTime.setText(bean.getTime());
             Picasso.with(MainActivity.this).load(Utils.getWeatherIcon(bean.getCode())).into(ivImage);
         }
     }
@@ -272,6 +322,18 @@ public class MainActivity extends BaseActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 获取toolbar右侧菜单
+     *
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     /**
