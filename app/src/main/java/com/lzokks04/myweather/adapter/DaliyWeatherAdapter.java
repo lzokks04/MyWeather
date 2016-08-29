@@ -2,6 +2,7 @@ package com.lzokks04.myweather.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,81 +11,99 @@ import android.widget.TextView;
 
 import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.bean.CityWeatherBean;
+import com.lzokks04.myweather.bean.DailyWeather;
 import com.lzokks04.myweather.util.Utils;
+
+import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
 
-/**recyclerview的adapter
+/**
+ * RecyclerView的Adapter
  * Created by Liu on 2016/8/28.
  */
-public class DaliyWeatherAdapter extends RecyclerView.Adapter<DaliyWeatherAdapter.MyHolder>{
+public class DaliyWeatherAdapter extends RecyclerView.Adapter<DaliyWeatherAdapter.MyHolder> {
 
     private Context context;
-    private CityWeatherBean bean;
-    private onItemClickListener mOnItemClickListener;
+    private CityWeatherBean cityWeatherBean;
+    private List<DailyWeather> dailyWeather;
 
-    public DaliyWeatherAdapter(Context context, CityWeatherBean bean) {
+    public DaliyWeatherAdapter(Context context, CityWeatherBean bean, List<DailyWeather> dailyWeather) {
         this.context = context;
-        this.bean = bean;
-    }
-
-    public void setOnItemClickLitener(onItemClickListener onItemClickLitener){
-        this.mOnItemClickListener = onItemClickLitener;
+        this.cityWeatherBean = bean;
+        this.dailyWeather = dailyWeather;
     }
 
     @Override
     public MyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        MyHolder holder = new MyHolder(LayoutInflater.from(context).inflate(R.layout.item_dailyweather,parent,false));
+        MyHolder holder = new MyHolder(LayoutInflater.from(context).inflate(R.layout.item_dailyweather, parent, false));
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(final MyHolder holder, int position) {
-        holder.tvWeatherDate.setText(Utils.getMonthDay(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getDate()));
+    public void onBindViewHolder(MyHolder holder, int position) {
+        setText(holder, position);
 
-        holder.tvLWeather.setText(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getCond().getTxt_d());
+    }
 
-        Picasso.with(context).load(Utils.getWeatherIcon(bean.getHeWeatherdataservice()
-                .get(0).getDaily_forecast().get(position).getCond().getCode_d())).into(holder.ivLWeather);
+    /**
+     * 设置文字
+     * @param holder
+     * @param position
+     */
+    private void setText(MyHolder holder, int position) {
+        if (cityWeatherBean != null && dailyWeather == null) {
+            holder.tvWeatherDate.setText(Utils.getMonthDay(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getDate()));
 
-        holder.tvLTemp.setText(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getTmp().getMax()+"°");
+            holder.tvLWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getCond().getTxt_d());
 
-        holder.tvProb.setText(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getPop()+"%");
+            Picasso.with(context).load(Utils.getWeatherIcon(cityWeatherBean.getHeWeatherdataservice()
+                    .get(0).getDaily_forecast().get(position).getCond().getCode_d())).into(holder.ivLWeather);
 
-        holder.tvNTemp.setText(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getTmp().getMin()+"°");
+            holder.tvLTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getTmp().getMax() + "°");
 
-        Picasso.with(context).load(Utils.getWeatherIcon(bean.getHeWeatherdataservice()
-                .get(0).getDaily_forecast().get(position).getCond().getCode_n())).into(holder.ivNWeather);
+            holder.tvProb.setText(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getPop() + "%");
 
-        holder.tvNWeather.setText(bean.getHeWeatherdataservice().get(0).
-                getDaily_forecast().get(position).getCond().getTxt_n());
+            holder.tvNTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getTmp().getMin() + "°");
 
-        //设定监听
-        if (mOnItemClickListener !=null){
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int pos = holder.getLayoutPosition();
-                    mOnItemClickListener.onItemClick(holder.itemView,pos);
-                }
-            });
+            Picasso.with(context).load(Utils.getWeatherIcon(cityWeatherBean.getHeWeatherdataservice()
+                    .get(0).getDaily_forecast().get(position).getCond().getCode_n())).into(holder.ivNWeather);
+
+            holder.tvNWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).
+                    getDaily_forecast().get(position).getCond().getTxt_n());
+        } else if (cityWeatherBean == null && dailyWeather != null) {
+            holder.tvWeatherDate.setText(dailyWeather.get(position).getDate());
+            holder.tvLWeather.setText(dailyWeather.get(position).getlWeather());
+            Picasso.with(context).load(Utils.getWeatherIcon(
+                    dailyWeather.get(position).getlCode())).into(holder.ivLWeather);
+            holder.tvLTemp.setText(dailyWeather.get(position).getlTemp());
+            holder.tvProb.setText(dailyWeather.get(position).getProb());
+            holder.tvNTemp.setText(dailyWeather.get(position).getnTemp());
+            holder.tvNWeather.setText(dailyWeather.get(position).getnWeather());
+            Picasso.with(context).load
+                    (Utils.getWeatherIcon(dailyWeather.get(position).getnCode())).into(holder.ivNWeather);
         }
     }
 
     @Override
     public int getItemCount() {
-        return bean.getHeWeatherdataservice().get(0).getDaily_forecast().size();
+        if (cityWeatherBean != null && dailyWeather == null) {
+            return cityWeatherBean.getHeWeatherdataservice().get(0).getDaily_forecast().size();
+        } else if (cityWeatherBean == null && dailyWeather != null) {
+            return dailyWeather.size();
+        }
+        return 0;
     }
 
     /**
      * viewholder
      */
-    class MyHolder extends RecyclerView.ViewHolder{
+    class MyHolder extends RecyclerView.ViewHolder {
 
         TextView tvWeatherDate;
         TextView tvLWeather;
@@ -108,10 +127,4 @@ public class DaliyWeatherAdapter extends RecyclerView.Adapter<DaliyWeatherAdapte
         }
     }
 
-    /**
-     * 点击事件接口
-     */
-    public interface onItemClickListener{
-        void onItemClick(View view,int position);
-    }
 }

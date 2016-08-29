@@ -2,7 +2,7 @@ package com.lzokks04.myweather.bean;
 
 import java.util.List;
 
-/**
+/**获取的城市天气实体类
  * Created by Liu on 2016/8/14.
  */
 public class CityWeatherBean {

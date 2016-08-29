@@ -17,10 +17,15 @@ import android.widget.Toast;
 import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.adapter.DaliyWeatherAdapter;
 import com.lzokks04.myweather.bean.CityWeatherBean;
+import com.lzokks04.myweather.bean.CityWeatherConBean;
+import com.lzokks04.myweather.bean.DailyWeather;
+import com.lzokks04.myweather.db.CityListHelper;
 import com.lzokks04.myweather.util.API;
 import com.lzokks04.myweather.util.ActivityCollector;
 import com.lzokks04.myweather.util.JsonConverterFactory;
 import com.lzokks04.myweather.util.Utils;
+
+import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
 import retrofit2.Retrofit;
@@ -44,6 +49,7 @@ public class MainActivity extends BaseActivity {
     private TextView tvCity;//城市
     private RecyclerView mRecyclerView;
     private DaliyWeatherAdapter adapter;
+    private CityListHelper helper;
 
 
     private long exitTime = 0;
@@ -66,9 +72,10 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData() {
         tvDayOfWeek.setText(Utils.getDayOfWeek());
+        helper = CityListHelper.getInstance(this);
         initToolBar();//初始化Toolbar
         isFirstBoot();//判断app是否第一次启动
-        getCityCode();//获取citycode并从网络获取天气信息(本地保存待加入)
+        getCityMessage();//获取citycode并从网络获取天气信息
     }
 
     /**
@@ -96,19 +103,19 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 初始化RecyclerView
+     *
      * @param bean
      */
-    private void initRecyclerView(CityWeatherBean bean) {
+    private void initRecyclerView(CityWeatherBean bean, List<DailyWeather> beanList) {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(adapter = new DaliyWeatherAdapter(this, bean));
-        adapter.setOnItemClickLitener(new DaliyWeatherAdapter.onItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
+        if (bean != null && beanList == null) {
+            mRecyclerView.setAdapter(adapter = new DaliyWeatherAdapter(this, bean, null));
+        } else if (bean == null && beanList != null) {
+            mRecyclerView.setAdapter(adapter = new DaliyWeatherAdapter(this, null, beanList));
+        }
 
-            }
-        });
     }
 
     /**
@@ -128,17 +135,33 @@ public class MainActivity extends BaseActivity {
     /**
      * 获取citycode并从网络获取天气信息
      */
-    private void getCityCode() {
+    private void getCityMessage() {
         Intent intent = getIntent();
         String cityCode = intent.getStringExtra("citycode");
         SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        //从选择界面跳转过来
         if (cityCode != null) {
             pref.edit().putString("citycode", cityCode).commit();
             getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+            //不是从选择界面跳转过来
         } else {
+            //如果SharedPreferences里有城市代号+
             if (pref.getString("citycode", null) != null) {
                 cityCode = pref.getString("citycode", null);
-                getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                //如果数据库中没有数据的话
+                if (helper.loadDailyWeather().size() == 0) {
+                    getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                } else if (helper.loadDailyWeather().size() > 0) {
+                    CityWeatherConBean bean = helper.loadCityWeather();
+                    List<DailyWeather> beanList = helper.loadDailyWeather();
+                    setText(null, bean);//设置文字
+                    initRecyclerView(null,beanList);
+                }
+                //没有的话强制跳转到选择城市界面
+            } else {
+                Intent i = new Intent(MainActivity.this, SelectActivity.class);
+                startActivity(i);
+                finish();
             }
         }
     }
@@ -177,38 +200,58 @@ public class MainActivity extends BaseActivity {
 
                     @Override
                     public void onNext(CityWeatherBean cityWeatherBean) {
-                        initRecyclerView(cityWeatherBean);//初始化RecyclerView
-                        setText(cityWeatherBean);
+                        initRecyclerView(cityWeatherBean,null);//初始化RecyclerView
+                        setText(cityWeatherBean, null);//设置UI文本
+                        saveInfoToDb(cityWeatherBean);//保存到数据库
                     }
                 });
     }
 
     /**
-     * 设置文字
+     * 将信息保存到数据库
      *
-     * @param cityWeatherBean
+     * @param bean
      */
-    private void setText(CityWeatherBean cityWeatherBean) {
-        tvCity.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity());
-        tvTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp()+"°");
-        tvWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt());
-        tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
-        tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
-                + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
-
-        Picasso.with(MainActivity.this).load(Utils.getWeatherIcon(cityWeatherBean.
-                getHeWeatherdataservice().get(0).getNow().getCond().getCode())).into(ivImage);
+    private void saveInfoToDb(final CityWeatherBean bean) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //存入前先把数据库清空
+                helper.clearCityWeatherTable();
+                helper.clearDailyWeatherTable();
+                //开始存储
+                helper.saveCityWeather(bean);
+                helper.saveDailyWeather(bean);
+            }
+        }).start();
     }
 
-//    private void saveCityInfotoPref(CityWeatherBean cityWeatherBean){
-//        SharedPreferences pref = getPreferences(MODE_PRIVATE);
-//        pref.edit().putString("cityname",cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity()).commit();
-//        pref.edit().putString("temp",cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp()+"°").commit();
-//        pref.edit().putString("weather",cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt()).commit();
-//        pref.edit().putString("hum","湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%").commit();
-//        pref.edit().putString("wind",cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
-//                + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级").commit();
-//    }
+    /**
+     * 设置UI文字，其中一个可以为空
+     *
+     * @param cityWeatherBean 此处为网络获取的,为空的话则调用第二个
+     * @param bean            此处为数据库获取的，
+     */
+    private void setText(CityWeatherBean cityWeatherBean, CityWeatherConBean bean) {
+        if (cityWeatherBean != null && bean == null) {
+            tvCity.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity());
+            tvTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp() + "°");
+            tvWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt());
+            tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
+            tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
+                    + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
+
+            Picasso.with(MainActivity.this).load(Utils.getWeatherIcon(cityWeatherBean.
+                    getHeWeatherdataservice().get(0).getNow().getCond().getCode())).into(ivImage);
+        } else if (cityWeatherBean == null && bean != null) {
+            tvCity.setText(bean.getCity());
+            tvTemp.setText(bean.getTemp());
+            tvWeather.setText(bean.getWeather());
+            tvHum.setText(bean.getHum());
+            tvWind.setText(bean.getWind());
+            Picasso.with(MainActivity.this).load(Utils.getWeatherIcon(bean.getCode())).into(ivImage);
+        }
+    }
 
     /**
      * 再按一次退出的实现
@@ -239,5 +282,3 @@ public class MainActivity extends BaseActivity {
         Observable<CityWeatherBean> getWeather(@Query("cityid") String cityCode, @Query("key") String apiKey);
     }
 }
-
-

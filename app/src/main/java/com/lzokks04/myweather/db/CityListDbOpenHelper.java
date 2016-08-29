@@ -13,6 +13,21 @@ public class CityListDbOpenHelper extends SQLiteOpenHelper{
             "city_name text," +
             "city_code text)";
 
+    public static final String CREATE_WEATHER = "create table cityweather (city text," +
+            "temp text," +
+            "weather text," +
+            "hum text," +
+            "wind text," +
+            "code text)";
+
+    public static final String CREATE_DAILY = "create table dailyweather (date text," +
+            "lweather text," +
+            "lcode text,"+
+            "ltemp text,"+
+            "ntemp text,"+
+            "ncode text,"+
+            "nweather text," +
+            "prob text)";
 
 
     public CityListDbOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
@@ -22,6 +37,8 @@ public class CityListDbOpenHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_SQL);
+        sqLiteDatabase.execSQL(CREATE_WEATHER);
+        sqLiteDatabase.execSQL(CREATE_DAILY);
     }
 
     @Override

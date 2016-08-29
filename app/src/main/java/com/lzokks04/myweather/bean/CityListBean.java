@@ -2,7 +2,7 @@ package com.lzokks04.myweather.bean;
 
 import java.util.List;
 
-/**
+/**获取的原始城市列表实体类
  * Created by Liu on 2016/8/12.
  */
 public class CityListBean{

@@ -1,6 +1,6 @@
 package com.lzokks04.myweather.bean;
 
-/**
+/**转换后的城市列表实体类
  * Created by Liu on 2016/8/16.
  */
 public class CityDetailBean {
