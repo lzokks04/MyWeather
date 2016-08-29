@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_weather_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="#ffffff"
+        android:text="8月28日"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/tv_l_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="多云"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
+
+    <ImageView
+        android:id="@+id/iv_l_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/tv_l_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="31°"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
+
+
+    <TextView
+        android:id="@+id/tv_n_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="24°"
+        android:layout_marginTop="20dp"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
+
+    <ImageView
+        android:id="@+id/iv_n_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/tv_n_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="多云"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/tv_prob"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="降水率:14%"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
+</LinearLayout>

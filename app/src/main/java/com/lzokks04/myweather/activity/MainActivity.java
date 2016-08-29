@@ -2,61 +2,103 @@ package com.lzokks04.myweather.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.graphics.Color;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.lzokks04.myweather.R;
+import com.lzokks04.myweather.adapter.DaliyWeatherAdapter;
 import com.lzokks04.myweather.bean.CityWeatherBean;
 import com.lzokks04.myweather.util.API;
 import com.lzokks04.myweather.util.ActivityCollector;
-import com.lzokks04.myweather.util.NetUtil;
-import com.lzokks04.myweather.util.NetUtilBitmapCallBack;
+import com.lzokks04.myweather.util.DividerGridItemDecoration;
+import com.lzokks04.myweather.util.JsonConverterFactory;
+import com.lzokks04.myweather.util.Utils;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+import it.sephiroth.android.library.picasso.Picasso;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-    private Button btnSwitch;
-    private Button btnRefresh;
-    private TextView tvTitle;
+public class MainActivity extends BaseActivity {
+
+    private Toolbar mToolbar;
     private ImageView ivImage;//天气图像
     private TextView tvTemp;//温度
     private TextView tvWeather;//天气状态
-    private TextView tvUptime;//最后更新时间
     private TextView tvHum;//相对湿度
     private TextView tvWind;//风力
-    private ListView lvDetail;
-    private String changeCityCode;
+    private TextView tvDayOfWeek;//今天星期几
+    private TextView tvCity;//城市
+    private RecyclerView mRecyclerView;
+    private DaliyWeatherAdapter adapter;
+
 
     private long exitTime = 0;
 
     @Override
     public void initView() {
         setContentView(R.layout.activity_main);
-        btnSwitch = (Button) findViewById(R.id.btn_switch);
-        btnRefresh = (Button) findViewById(R.id.btn_refresh);
-        tvTitle = (TextView) findViewById(R.id.tv_title);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        tvCity = (TextView) findViewById(R.id.tv_city);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         ivImage = (ImageView) findViewById(R.id.iv_image);
         tvTemp = (TextView) findViewById(R.id.tv_temp);
         tvWeather = (TextView) findViewById(R.id.tv_weather);
-        tvUptime = (TextView) findViewById(R.id.tv_uptime);
         tvHum = (TextView) findViewById(R.id.tv_hum);
         tvWind = (TextView) findViewById(R.id.tv_wind);
-        lvDetail = (ListView) findViewById(R.id.lv_detail);
+        tvDayOfWeek = (TextView) findViewById(R.id.tv_dayofweek);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
     }
 
     @Override
     protected void initData() {
-        isFirstBoot();
-        getCityCode();
+        initToolBar();//初始化Toolbar
+        isFirstBoot();//判断app是否第一次启动
+        getCityCode();//获取citycode并从网络获取天气信息(本地保存待加入)
+    }
+
+    /**
+     * 初始化Toolbar
+     */
+    private void initToolBar() {
+        mToolbar.setTitle("天气");
+        mToolbar.setTitleTextColor(Color.WHITE);
+        setSupportActionBar(mToolbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_menu_white_18dp);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SelectActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    /**
+     * 初始化RecyclerView
+     * @param bean
+     */
+    private void initRecyclerView(CityWeatherBean bean) {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.addItemDecoration(new DividerGridItemDecoration(this));
+        mRecyclerView.setAdapter(adapter = new DaliyWeatherAdapter(this, bean));
     }
 
     /**
@@ -70,12 +112,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             Intent intent = new Intent(MainActivity.this, SelectActivity.class);
             startActivity(intent);
             finish();
-            overridePendingTransition(0, R.anim.slide_out_to_bottom);
         }
     }
 
     /**
-     * 判断是否从选择界面过来并修改SharedPreferences
+     * 获取citycode并从网络获取天气信息
      */
     private void getCityCode() {
         Intent intent = getIntent();
@@ -83,141 +124,77 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         SharedPreferences pref = getPreferences(MODE_PRIVATE);
         if (cityCode != null) {
             pref.edit().putString("citycode", cityCode).commit();
-            changeCityCode = cityCode;
-            new MyAsyncTask().execute(API.CITY_RESPONSE + cityCode + API.USER_ID);
+            getCityWeather(API.WEATHER, cityCode, API.USER_ID);
         } else {
             if (pref.getString("citycode", null) != null) {
                 cityCode = pref.getString("citycode", null);
-                changeCityCode = cityCode;
-                new MyAsyncTask().execute(API.CITY_RESPONSE + cityCode + API.USER_ID);
+                getCityWeather(API.WEATHER, cityCode, API.USER_ID);
             }
         }
     }
 
     @Override
     public void initListener() {
-        btnSwitch.setOnClickListener(this);
-        btnRefresh.setOnClickListener(this);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
     }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btn_switch: {
-                Intent intent = new Intent(MainActivity.this, SelectActivity.class);
-                startActivity(intent);
-                finish();
-                overridePendingTransition(0, R.anim.slide_out_to_bottom);
-                break;
-            }
-            case R.id.btn_refresh: {
-                new MyAsyncTask().execute(API.CITY_RESPONSE + changeCityCode + API.USER_ID);
-                break;
-            }
-        }
-    }
-
 
     /**
-     * 获得json数据，并解析成CityWeatherBean对象
+     * retrofit+rxjava获取json并解析
      *
-     * @param url
-     * @return
+     * @param baseURL
+     * @param cityCode
+     * @param apiKey
      */
-    private CityWeatherBean getJSONData(String url) {
-        String jsonData = NetUtil.getJsonData(url);
-        CityWeatherBean bean = GsonFormat(jsonData);
-        return bean;
+    private void getCityWeather(String baseURL, String cityCode, String apiKey) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseURL)
+                //自定义的JsonConverterFactory,去除json原始数据的非法数据
+                .addConverterFactory(JsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+
+        WeatherService service = retrofit.create(WeatherService.class);
+
+        service.getWeather(cityCode, apiKey)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<CityWeatherBean>() {
+                    @Override
+                    public void onCompleted() {
+//                        Toast.makeText(MainActivity.this, "操作完成！", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("mjj", e.getMessage());
+                        Toast.makeText(MainActivity.this, "操作失败！请检查网络设置!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(CityWeatherBean cityWeatherBean) {
+                        initRecyclerView(cityWeatherBean);//初始化RecyclerView
+                        setText(cityWeatherBean);
+                    }
+                });
     }
 
     /**
-     * 由于json中字段含有违规字符，所以去除（空格，点，数字）
+     * 设置文字
      *
-     * @param str
-     * @return
+     * @param cityWeatherBean
      */
-    private String deleteErrData(String str) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < str.length(); i++) {
-            sb.append(str.charAt(i));
-        }
-        sb.deleteCharAt(11);
-        sb.deleteCharAt(15);
-        sb.delete(22, 26);
-        return sb.toString();
-    }
+    private void setText(CityWeatherBean cityWeatherBean) {
+        tvCity.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity());
+        tvDayOfWeek.setText(Utils.getDayOfWeek());
+        tvTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp()+"°");
+        tvWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt());
+        tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
+        tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
+                + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
 
-    /**
-     * 获取到的json数据解析成bean
-     *
-     * @param str
-     * @return
-     */
-    private CityWeatherBean GsonFormat(String str) {
-        String res = deleteErrData(str);
-        Gson gson = new Gson();
-        CityWeatherBean bean = gson.fromJson(res, CityWeatherBean.class);
-        return bean;
-    }
-
-    /**
-     * asynctask异步类，传入URL并获得bean类并设置settext
-     */
-    private class MyAsyncTask extends AsyncTask<String, Void, CityWeatherBean> {
-
-        @Override
-        protected CityWeatherBean doInBackground(String... strings) {
-            return getJSONData(strings[0]);
-        }
-
-        @Override
-        protected void onPostExecute(CityWeatherBean cityWeatherBean) {
-            super.onPostExecute(cityWeatherBean);
-            tvTitle.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getBasic().getCity());
-            tvTemp.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getTmp() + "°");
-            tvWeather.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getTxt());
-            tvUptime.setText(getTime(cityWeatherBean.getHeWeatherdataservice().get(0)
-                    .getBasic().getUpdate().getLoc() + "更新"));
-            tvHum.setText("湿度:" + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getHum() + "%");
-            tvWind.setText(cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getDir() + ":"
-                    + cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
-
-            NetUtil.getBitmap(API.WEATHER_ICON +
-                    cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getCode()
-                    + API.ICON_SUFFIX, new NetUtilBitmapCallBack() {
-                @Override
-                public void onSuccess(final Bitmap bitmap) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ivImage.setImageBitmap(bitmap);
-                        }
-                    });
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e("onFailure: ", "然而并没有");
-                }
-            });
-
-        }
-    }
-
-    /**
-     * 把更新时间前的日期去掉
-     * @param str
-     * @return
-     */
-    private String getTime(String str){
-        StringBuffer sb = new StringBuffer(str);
-        sb.delete(0, 11);
-        return sb.toString();
+        Picasso.with(MainActivity.this).load(API.WEATHER_ICON +
+                cityWeatherBean.getHeWeatherdataservice().get(0).getNow().getCond().getCode()
+                + API.ICON_SUFFIX).into(ivImage);
     }
 
     /**
@@ -240,4 +217,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    /**
+     * retrofit拦截器
+     */
+    private interface WeatherService {
+        @GET("x3/weather")
+        Observable<CityWeatherBean> getWeather(@Query("cityid") String cityCode, @Query("key") String apiKey);
+    }
 }
+
+

@@ -2,24 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:focusable="true"
-              android:focusableInTouchMode="true"
               android:orientation="vertical">
 
-    <RelativeLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="#3f51B5">
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="省份"
-            android:textSize="30sp"/>
-
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary">
+    </android.support.v7.widget.Toolbar>
 
     <ListView
         android:id="@+id/lv_select"
