@@ -97,10 +97,10 @@ public class MainActivity extends BaseActivity {
      * 初始化Toolbar
      */
     private void initToolBar() {
-        setSupportActionBar(mToolbar);
         mToolbar.setTitle("天气");
         mToolbar.setTitleTextColor(Color.WHITE);
         mToolbar.setNavigationIcon(R.drawable.ic_menu_white_18dp);
+        setSupportActionBar(mToolbar);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -129,6 +129,7 @@ public class MainActivity extends BaseActivity {
                 finish();
             }
         });
+
     }
 
     @Override
