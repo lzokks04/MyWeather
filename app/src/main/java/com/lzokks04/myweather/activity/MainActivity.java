@@ -57,7 +57,6 @@ public class MainActivity extends BaseActivity {
     private String code;
     private ProgressDialog progress;
 
-
     private long exitTime = 0;
 
     @Override
@@ -110,7 +109,7 @@ public class MainActivity extends BaseActivity {
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.about:
-                        Intent i = new Intent(MainActivity.this,AboutActivity.class);
+                        Intent i = new Intent(MainActivity.this, AboutActivity.class);
                         startActivity(i);
                         break;
                     case R.id.exit:
@@ -182,6 +181,12 @@ public class MainActivity extends BaseActivity {
             getCityWeather(API.WEATHER, cityCode, API.USER_ID);
             //不是从选择界面跳转过来
         } else {
+            //如果过去1小时候进入app则自动更新天气
+            long lastTime = pref.getLong("lasttime", 0);
+            if (lastTime != 0 && System.currentTimeMillis() - lastTime >= 3600000) {
+                getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                return;
+            }
             //如果SharedPreferences里有城市代号+
             if (pref.getString("citycode", null) != null) {
                 cityCode = pref.getString("citycode", null);
@@ -229,6 +234,7 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void onCompleted() {
                         hideProgress();
+                        saveLastTime();
                     }
 
                     @Override
@@ -245,6 +251,14 @@ public class MainActivity extends BaseActivity {
                         saveInfoToDb(cityWeatherBean);//保存到数据库
                     }
                 });
+    }
+
+    /**
+     * 保存更新后的时间到SharedPreferences
+     */
+    private void saveLastTime() {
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        pref.edit().putLong("lasttime", System.currentTimeMillis()).commit();
     }
 
     /**
@@ -335,6 +349,15 @@ public class MainActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    /**
+     * 回到app后自动更新天气
+     */
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getCityWeather(API.WEATHER, code, API.USER_ID);
     }
 
     /**
