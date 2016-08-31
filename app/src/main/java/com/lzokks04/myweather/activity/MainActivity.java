@@ -181,16 +181,15 @@ public class MainActivity extends BaseActivity {
             getCityWeather(API.WEATHER, cityCode, API.USER_ID);
             //不是从选择界面跳转过来
         } else {
-            //如果过去1小时候进入app则自动更新天气
-            long lastTime = pref.getLong("lasttime", 0);
-            if (lastTime != 0 && System.currentTimeMillis() - lastTime >= 3600000) {
-                getCityWeather(API.WEATHER, cityCode, API.USER_ID);
-                return;
-            }
             //如果SharedPreferences里有城市代号+
             if (pref.getString("citycode", null) != null) {
                 cityCode = pref.getString("citycode", null);
                 code = cityCode;
+                //如果过去1小时候进入app则自动更新天气
+                long lastTime = pref.getLong("lasttime", 0);
+                if (lastTime != 0 && System.currentTimeMillis() - lastTime >= 3600000) {
+                    getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                }
                 //如果数据库中没有数据的话
                 if (helper.loadDailyWeather().size() == 0) {
                     getCityWeather(API.WEATHER, cityCode, API.USER_ID);

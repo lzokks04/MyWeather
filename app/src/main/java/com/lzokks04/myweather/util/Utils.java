@@ -147,6 +147,11 @@ public class Utils {
         return beanList;
     }
 
+    /**
+     * 根据天气代码返回天气图片的int
+     * @param code
+     * @return
+     */
     public static int getWeatherIcon(String code){
         switch (code){
             case "100":
