@@ -25,58 +25,55 @@ import com.lzokks04.myweather.bean.DailyWeather;
 import com.lzokks04.myweather.db.CityListHelper;
 import com.lzokks04.myweather.util.API;
 import com.lzokks04.myweather.util.ActivityCollector;
-import com.lzokks04.myweather.util.JsonConverterFactory;
 import com.lzokks04.myweather.util.Utils;
+import com.lzokks04.myweather.util.retrofit.JsonConverterFactory;
+import com.lzokks04.myweather.util.retrofit.WeatherService;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import it.sephiroth.android.library.picasso.Picasso;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity {
 
-    private Toolbar mToolbar;
-    private ImageView ivImage;//天气图像
-    private TextView tvTemp;//温度
-    private TextView tvWeather;//天气状态
-    private TextView tvHum;//相对湿度
-    private TextView tvWind;//风力
-    private TextView tvDayOfWeek;//今天星期几
-    private TextView tvCity;//城市
-    private TextView tvLastTime;//最后更新
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.tv_lasttime)
+    TextView tvLastTime;//最后更新
+    @BindView(R.id.tv_city)
+    TextView tvCity;//城市
+    @BindView(R.id.tv_dayofweek)
+    TextView tvDayOfWeek;//今天星期几
+    @BindView(R.id.iv_image)
+    ImageView ivImage;//天气图像
+    @BindView(R.id.tv_temp)
+    TextView tvTemp;//温度
+    @BindView(R.id.tv_weather)
+    TextView tvWeather;//天气状态
+    @BindView(R.id.tv_wind)
+    TextView tvWind;//风力
+    @BindView(R.id.tv_hum)
+    TextView tvHum;//相对湿度
+    @BindView(R.id.recyclerview)
+    RecyclerView mRecyclerView;
+
     private DaliyWeatherAdapter adapter;
-    private CityListHelper helper;
-    private String code;
+    private CityListHelper helper;//数据库帮助类
+    private String code;//城市代码
     private ProgressDialog progress;
 
-    private long exitTime = 0;
+    private long exitTime = 0;//最后推出时间
 
     @Override
-    public void initView() {
+    protected void initialization() {
         setContentView(R.layout.activity_main);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        tvCity = (TextView) findViewById(R.id.tv_city);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        tvLastTime = (TextView) findViewById(R.id.tv_lasttime);
-        ivImage = (ImageView) findViewById(R.id.iv_image);
-        tvTemp = (TextView) findViewById(R.id.tv_temp);
-        tvWeather = (TextView) findViewById(R.id.tv_weather);
-        tvHum = (TextView) findViewById(R.id.tv_hum);
-        tvWind = (TextView) findViewById(R.id.tv_wind);
-        tvDayOfWeek = (TextView) findViewById(R.id.tv_dayofweek);
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-    }
-
-    @Override
-    protected void initData() {
+        ButterKnife.bind(this);
         tvDayOfWeek.setText(Utils.getDayOfWeek());
         helper = CityListHelper.getInstance(this);
         initToolBar();//初始化Toolbar
@@ -85,6 +82,9 @@ public class MainActivity extends BaseActivity {
         getCityMessage();//获取citycode并从网络获取天气信息
     }
 
+    /**
+     * 初始化ProgressDialog
+     */
     private void initDialog() {
         progress = new ProgressDialog(this);
         progress.setCancelable(false);// 设置是否可以通过点击Back键取消
@@ -128,11 +128,6 @@ public class MainActivity extends BaseActivity {
                 finish();
             }
         });
-
-    }
-
-    @Override
-    public void initListener() {
 
     }
 
@@ -357,13 +352,5 @@ public class MainActivity extends BaseActivity {
     protected void onRestart() {
         super.onRestart();
         getCityWeather(API.WEATHER, code, API.USER_ID);
-    }
-
-    /**
-     * retrofit拦截器
-     */
-    private interface WeatherService {
-        @GET("x3/weather")
-        Observable<CityWeatherBean> getWeather(@Query("cityid") String cityCode, @Query("key") String apiKey);
     }
 }

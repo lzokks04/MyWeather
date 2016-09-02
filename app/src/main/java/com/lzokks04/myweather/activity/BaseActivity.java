@@ -6,25 +6,21 @@ import android.support.v7.app.AppCompatActivity;
 import com.lzokks04.myweather.R;
 import com.lzokks04.myweather.util.ActivityCollector;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Created by Liu on 2016/8/13.
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityCollector.addActivity(this);
-        initView();
-        initData();
-        initListener();
+        initialization();
     }
 
-    public abstract void initView();
-
-    protected abstract void initData();
-
-    public abstract void initListener();
+    protected abstract void initialization();
 
     @Override
     public void finish() {

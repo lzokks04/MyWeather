@@ -1,8 +1,8 @@
 package com.lzokks04.myweather.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
@@ -13,7 +13,7 @@ import com.lzokks04.myweather.R;
 /**
  * Created by Liu on 2016/8/13.
  */
-public class LogoActivity extends Activity {
+public class LogoActivity extends AppCompatActivity {
 
     private Animation anim;
 

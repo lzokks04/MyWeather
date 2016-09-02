@@ -1,9 +1,10 @@
-package com.lzokks04.myweather.util;
+package com.lzokks04.myweather.util.retrofit;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.lzokks04.myweather.bean.CityWeatherBean;
+import com.lzokks04.myweather.util.Utils;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

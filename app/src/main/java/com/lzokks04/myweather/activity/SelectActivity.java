@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -17,15 +16,16 @@ import com.lzokks04.myweather.bean.CityListBean;
 import com.lzokks04.myweather.db.CityListHelper;
 import com.lzokks04.myweather.util.API;
 import com.lzokks04.myweather.util.Utils;
+import com.lzokks04.myweather.util.retrofit.WeatherService;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnItemClick;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -35,38 +35,38 @@ import rx.schedulers.Schedulers;
  * 选择城市列表activity
  * Created by Liu on 2016/8/13.
  */
-public class SelectActivity extends BaseActivity implements AdapterView.OnItemClickListener {
+public class SelectActivity extends BaseActivity {
 
-    public static final int LEVEL_PROV = 1;
-    public static final int LEVEL_CITY = 2;
-    public static final int GET_NET = 3;
-    public static final int GET_DB = 4;
+    public static final int LEVEL_PROV = 1;//省份列表状态
+    public static final int LEVEL_CITY = 2;//城市列表状态
+    public static final int GET_NET = 3;//从互联网获取天气的状态
+    public static final int GET_DB = 4;//从数据库获取天气的状态
 
-    private ListView mListView;
-    private Toolbar mToolbar;
-    private CityListHelper helper;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.lv_select)
+    ListView lvSelect;
+
+    private CityListHelper helper;//数据库帮助类
+    private ProgressDialog progress;
+
     private ArrayAdapter<String> adapter;
     private List<CityDetailBean> cityDetailBeanList;
 
-    private int currentLevel;
-    private int currentGetLevel;
-    private List<String> provList;
-    private List<String> cityList;
-    private String cityCode;
-    private String selectProv;
-    private ProgressDialog progress;
+    private int currentLevel;//选择的列表状态（省份/城市）
+    private int currentGetLevel;//选择的数据获取状态（网络/数据）
+    private List<String> provList;//省份列表
+    private List<String> cityList;//城市列表
+    private String cityCode;//城市代码
+    private String selectProv;//选择的省份，用于显示toolbar
 
 
     @Override
-    public void initView() {
+    protected void initialization() {
         setContentView(R.layout.activity_select);
-        mListView = (ListView) findViewById(R.id.lv_select);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-    }
-
-    @Override
-    protected void initData() {
+        ButterKnife.bind(this);
         helper = CityListHelper.getInstance(this);
+        //初始化ProgressDialog
         initProgressDialog();
         //设置listview
         initListView();
@@ -74,15 +74,9 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
         setToolbar();
     }
 
-    @Override
-    public void initListener() {
-        mListView.setOnItemClickListener(this);
-    }
-
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        itemClick(i);
+    @OnItemClick(R.id.lv_select)
+    public void ItemClick(int position){
+        itemClick(position);
     }
 
     private void itemClick(int i) {
@@ -98,8 +92,8 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
                 selectProv = provList.get(i);
             }
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, cityList);
-            mListView.setAdapter(adapter);
-            mToolbar.setTitle(selectProv);
+            lvSelect.setAdapter(adapter);
+            toolbar.setTitle(selectProv);
             currentLevel = LEVEL_CITY;
             //如果是在城市列表
         } else if (currentLevel == LEVEL_CITY) {
@@ -120,13 +114,13 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
      * 初始化Toolbar
      */
     private void setToolbar() {
-        mToolbar.setTitle("省份");
-        mToolbar.setTitleTextColor(Color.WHITE);
-        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_18dp);
-        setSupportActionBar(mToolbar);
+        toolbar.setTitle("省份");
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_18dp);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 backSelect();
@@ -134,6 +128,7 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
         });
     }
 
+    //初始化ProgressDialog
     private void initProgressDialog() {
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
@@ -151,22 +146,23 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
             provList = helper.loadProvData();
             adapter = new ArrayAdapter<String>(SelectActivity.this, android.R.layout.simple_list_item_1,
                     provList);
-            mListView.setAdapter(adapter);
+            lvSelect.setAdapter(adapter);
             currentLevel = LEVEL_PROV;
             currentGetLevel = GET_DB;
         } else {
-            getCityList(API.WEATHER,"allchina", API.USER_ID);
+            getCityList(API.WEATHER, "allchina", API.USER_ID);
             currentGetLevel = GET_NET;
         }
     }
 
     /**
      * 通过rxjava+retrofit获取json并解析
+     *
      * @param baseUrl
      * @param cityType
      * @param apiKey
      */
-    private void getCityList(String baseUrl,String cityType,String apiKey){
+    private void getCityList(String baseUrl, String cityType, String apiKey) {
         progress.show();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
@@ -174,9 +170,9 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
-        CityListService service = retrofit.create(CityListService.class);
+        WeatherService service = retrofit.create(WeatherService.class);
 
-        service.getCityList(cityType,apiKey)
+        service.getCityList(cityType, apiKey)
                 .map(new Func1<CityListBean, List<CityDetailBean>>() {
                     @Override
                     public List<CityDetailBean> call(CityListBean bean) {
@@ -203,7 +199,7 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
                         provList = Utils.getProvStringGroup(beanList);
                         adapter = new ArrayAdapter<String>(SelectActivity.this, android.R.layout.simple_list_item_1,
                                 provList);
-                        mListView.setAdapter(adapter);
+                        lvSelect.setAdapter(adapter);
                         currentLevel = LEVEL_PROV;
                         cityDetailBeanList = beanList;
                         new Thread(new Runnable() {
@@ -242,21 +238,13 @@ public class SelectActivity extends BaseActivity implements AdapterView.OnItemCl
         if (currentLevel == LEVEL_CITY) {
             currentLevel = LEVEL_PROV;
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, provList);
-            mListView.setAdapter(adapter);
-            mToolbar.setTitle("省份");
+            lvSelect.setAdapter(adapter);
+            toolbar.setTitle("省份");
             adapter.notifyDataSetChanged();
         } else if (currentLevel == LEVEL_PROV) {
             Intent intent = new Intent(SelectActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
-    }
-
-    /**
-     * retrofit拦截器
-     */
-    private interface CityListService{
-        @GET("x3/citylist")
-        Observable<CityListBean>getCityList(@Query("search")String cityType,@Query("key")String apiKey);
     }
 }
