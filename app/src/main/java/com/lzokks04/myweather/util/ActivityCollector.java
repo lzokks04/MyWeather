@@ -23,6 +23,7 @@ public class ActivityCollector {
         for (Activity a:activities){
             if (!a.isFinishing()){
                 a.finish();
+                System.exit(0);
             }
         }
     }

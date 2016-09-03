@@ -107,6 +107,7 @@ public class SelectActivity extends BaseActivity {
             Intent intent = new Intent(SelectActivity.this, MainActivity.class);
             intent.putExtra("citycode", cityCode);
             startActivity(intent);
+            finish();
         }
     }
 
@@ -202,6 +203,8 @@ public class SelectActivity extends BaseActivity {
                         lvSelect.setAdapter(adapter);
                         currentLevel = LEVEL_PROV;
                         cityDetailBeanList = beanList;
+
+                        //开线程，将城市列表保存到数据库
                         new Thread(new Runnable() {
                             @Override
                             public void run() {

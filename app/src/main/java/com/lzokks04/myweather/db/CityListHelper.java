@@ -79,21 +79,34 @@ public class CityListHelper {
      * @return
      */
     public List<String> loadProvData() {
-        List<String> list = new ArrayList<String>();
-        Cursor cursor = db.query("citylistinfo", null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                list.add(cursor.getString(cursor.getColumnIndex("province_name")));
-            } while (cursor.moveToNext());
-        }
-        //去重
-        Set<String> set = new HashSet<String>();
-        for (int i = 0; i < list.size(); i++) {
-            set.add(list.get(i));
-        }
-        list.clear();
-        for (String str : set) {
-            list.add(str);
+        List<String> list = null;
+        Cursor cursor = null;
+        try {
+            list = new ArrayList<String>();
+            cursor = db.query("citylistinfo", null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    list.add(cursor.getString(cursor.getColumnIndex("province_name")));
+                } while (cursor.moveToNext());
+            }
+            //去重
+            Set<String> set = new HashSet<String>();
+            for (int i = 0; i < list.size(); i++) {
+                set.add(list.get(i));
+            }
+            list.clear();
+            for (String str : set) {
+                list.add(str);
+            }
+            if (cursor != null) {
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return list;
     }
@@ -105,16 +118,27 @@ public class CityListHelper {
      * @return
      */
     public List<String> loadCityData(String prov) {
-        List<String> list = new ArrayList<String>();
-        Cursor cursor = db.query("citylistinfo", null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                if (prov.equals(cursor.getString(cursor.getColumnIndex("province_name")))) {
-                    list.add(cursor.getString(cursor.getColumnIndex("city_name")));
-                }
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        List<String> list = null;
+        try {
+            list = new ArrayList<String>();
+            cursor = db.query("citylistinfo", null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    if (prov.equals(cursor.getString(cursor.getColumnIndex("province_name")))) {
+                        list.add(cursor.getString(cursor.getColumnIndex("city_name")));
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            return list;
         }
-        return list;
+
     }
 
     /**
@@ -125,13 +149,22 @@ public class CityListHelper {
      */
     public String loadCityCode(String city) {
         String cityCode = null;
-        Cursor cursor = db.query("citylistinfo", null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                if (city.equals(cursor.getString(cursor.getColumnIndex("city_name")))) {
-                    cityCode = cursor.getString(cursor.getColumnIndex("city_code"));
-                }
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        try {
+            cursor = db.query("citylistinfo", null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    if (city.equals(cursor.getString(cursor.getColumnIndex("city_name")))) {
+                        cityCode = cursor.getString(cursor.getColumnIndex("city_code"));
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return cityCode;
     }
@@ -151,8 +184,8 @@ public class CityListHelper {
             values.put("wind", bean.getHeWeatherdataservice().get(0).getNow().getWind().getDir()
                     + bean.getHeWeatherdataservice().get(0).getNow().getWind().getSc() + "级");
             values.put("code", bean.getHeWeatherdataservice().get(0).getNow().getCond().getCode());
-            values.put("time",Utils.getLastTime(bean.getHeWeatherdataservice().get(0).
-                    getBasic().getUpdate().getLoc())+"更新");
+            values.put("time", Utils.getLastTime(bean.getHeWeatherdataservice().get(0).
+                    getBasic().getUpdate().getLoc()) + "更新");
             db.insert("cityweather", null, values);
         }
     }
@@ -193,18 +226,28 @@ public class CityListHelper {
      * @return
      */
     public CityWeatherConBean loadCityWeather() {
-        Cursor cursor = db.query("cityweather", null, null, null, null, null, null);
-        CityWeatherConBean bean = new CityWeatherConBean();
-        if (cursor.moveToFirst()) {
-            do {
-                bean.setCity(cursor.getString(cursor.getColumnIndex("city")));
-                bean.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                bean.setHum(cursor.getString(cursor.getColumnIndex("hum")));
-                bean.setTemp(cursor.getString(cursor.getColumnIndex("temp")));
-                bean.setWind(cursor.getString(cursor.getColumnIndex("wind")));
-                bean.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
-                bean.setTime(cursor.getString(cursor.getColumnIndex("time")));
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        CityWeatherConBean bean = null;
+        try {
+            cursor = db.query("cityweather", null, null, null, null, null, null);
+            bean = new CityWeatherConBean();
+            if (cursor.moveToFirst()) {
+                do {
+                    bean.setCity(cursor.getString(cursor.getColumnIndex("city")));
+                    bean.setCode(cursor.getString(cursor.getColumnIndex("code")));
+                    bean.setHum(cursor.getString(cursor.getColumnIndex("hum")));
+                    bean.setTemp(cursor.getString(cursor.getColumnIndex("temp")));
+                    bean.setWind(cursor.getString(cursor.getColumnIndex("wind")));
+                    bean.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+                    bean.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return bean;
     }
@@ -215,21 +258,31 @@ public class CityListHelper {
      * @return
      */
     public List<DailyWeather> loadDailyWeather() {
-        Cursor cursor = db.query("dailyweather", null, null, null, null, null, null);
-        List<DailyWeather> beanList = new ArrayList<DailyWeather>();
-        if (cursor.moveToFirst()) {
-            do {
-                DailyWeather bean = new DailyWeather();
-                bean.setDate(cursor.getString(cursor.getColumnIndex("date")));
-                bean.setlWeather(cursor.getString(cursor.getColumnIndex("lweather")));
-                bean.setlCode(cursor.getString(cursor.getColumnIndex("lcode")));
-                bean.setlTemp(cursor.getString(cursor.getColumnIndex("ltemp")));
-                bean.setnTemp(cursor.getString(cursor.getColumnIndex("ntemp")));
-                bean.setnCode(cursor.getString(cursor.getColumnIndex("ncode")));
-                bean.setnWeather(cursor.getString(cursor.getColumnIndex("nweather")));
-                bean.setProb(cursor.getString(cursor.getColumnIndex("prob")));
-                beanList.add(bean);
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        List<DailyWeather> beanList = null;
+        try {
+            cursor = db.query("dailyweather", null, null, null, null, null, null);
+            beanList = new ArrayList<DailyWeather>();
+            if (cursor.moveToFirst()) {
+                do {
+                    DailyWeather bean = new DailyWeather();
+                    bean.setDate(cursor.getString(cursor.getColumnIndex("date")));
+                    bean.setlWeather(cursor.getString(cursor.getColumnIndex("lweather")));
+                    bean.setlCode(cursor.getString(cursor.getColumnIndex("lcode")));
+                    bean.setlTemp(cursor.getString(cursor.getColumnIndex("ltemp")));
+                    bean.setnTemp(cursor.getString(cursor.getColumnIndex("ntemp")));
+                    bean.setnCode(cursor.getString(cursor.getColumnIndex("ncode")));
+                    bean.setnWeather(cursor.getString(cursor.getColumnIndex("nweather")));
+                    bean.setProb(cursor.getString(cursor.getColumnIndex("prob")));
+                    beanList.add(bean);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return beanList;
     }
@@ -237,14 +290,14 @@ public class CityListHelper {
     /**
      * 清空当前天气表
      */
-    public void clearCityWeatherTable(){
+    public void clearCityWeatherTable() {
         db.execSQL("delete from cityweather");
     }
 
     /**
      * 清空每日天气表
      */
-    public void clearDailyWeatherTable(){
+    public void clearDailyWeatherTable() {
         db.execSQL("delete from dailyweather");
     }
 }
