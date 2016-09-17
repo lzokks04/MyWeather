@@ -1,8 +1,7 @@
-package com.lzokks04.myweather.adapter;
+package com.lzokks04.myweather.view.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lzokks04.myweather.R;
-import com.lzokks04.myweather.bean.CityWeatherBean;
-import com.lzokks04.myweather.bean.DailyWeather;
+import com.lzokks04.myweather.model.bean.CityWeatherBean;
+import com.lzokks04.myweather.model.bean.DailyWeather;
 import com.lzokks04.myweather.util.Utils;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import it.sephiroth.android.library.picasso.Picasso;
 
 /**
@@ -48,6 +49,7 @@ public class DaliyWeatherAdapter extends RecyclerView.Adapter<DaliyWeatherAdapte
 
     /**
      * 设置文字
+     *
      * @param holder
      * @param position
      */
@@ -105,25 +107,26 @@ public class DaliyWeatherAdapter extends RecyclerView.Adapter<DaliyWeatherAdapte
      */
     class MyHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.tv_weather_date)
         TextView tvWeatherDate;
+        @BindView(R.id.tv_l_weather)
         TextView tvLWeather;
+        @BindView(R.id.iv_l_weather)
         ImageView ivLWeather;
+        @BindView(R.id.tv_l_temp)
         TextView tvLTemp;
-        TextView tvProb;
+        @BindView(R.id.tv_n_temp)
         TextView tvNTemp;
+        @BindView(R.id.iv_n_weather)
         ImageView ivNWeather;
+        @BindView(R.id.tv_n_weather)
         TextView tvNWeather;
+        @BindView(R.id.tv_prob)
+        TextView tvProb;
 
         public MyHolder(View itemView) {
             super(itemView);
-            tvWeatherDate = (TextView) itemView.findViewById(R.id.tv_weather_date);
-            tvLWeather = (TextView) itemView.findViewById(R.id.tv_l_weather);
-            ivLWeather = (ImageView) itemView.findViewById(R.id.iv_l_weather);
-            tvLTemp = (TextView) itemView.findViewById(R.id.tv_l_temp);
-            tvProb = (TextView) itemView.findViewById(R.id.tv_prob);
-            tvNTemp = (TextView) itemView.findViewById(R.id.tv_n_temp);
-            ivNWeather = (ImageView) itemView.findViewById(R.id.iv_n_weather);
-            tvNWeather = (TextView) itemView.findViewById(R.id.tv_n_weather);
+            ButterKnife.bind(this, itemView);
         }
     }
 

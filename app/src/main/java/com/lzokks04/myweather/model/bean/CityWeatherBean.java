@@ -1,4 +1,4 @@
-package com.lzokks04.myweather.bean;
+package com.lzokks04.myweather.model.bean;
 
 import java.util.List;
 

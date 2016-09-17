@@ -1,32 +1,26 @@
-package com.lzokks04.myweather.db;
+package com.lzokks04.myweather.model.db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.lzokks04.myweather.bean.CityDetailBean;
-import com.lzokks04.myweather.bean.CityWeatherBean;
-import com.lzokks04.myweather.bean.CityWeatherConBean;
-import com.lzokks04.myweather.bean.DailyWeather;
+import com.lzokks04.myweather.model.bean.CityDetailBean;
+import com.lzokks04.myweather.model.bean.CityWeatherBean;
+import com.lzokks04.myweather.model.bean.CityWeatherConBean;
+import com.lzokks04.myweather.model.bean.DailyWeather;
 import com.lzokks04.myweather.util.Utils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Liu on 2016/8/12.
  */
 public class CityListHelper {
-    /**
-     * 數據庫名
-     */
+
     public static final String DB_NAME = "weatherdb";
-    /**
-     * 數據庫版本
-     */
+
     public static final int VER = 1;
 
     private static CityListHelper cityListHelper;
@@ -73,90 +67,19 @@ public class CityListHelper {
         }
     }
 
-    /**
-     * 将省份列表提取出来
-     *
-     * @return
-     */
-    public List<String> loadProvData() {
-        List<String> list = null;
+    public List<CityDetailBean> loadCityData() {
+        List<CityDetailBean> beanList = null;
         Cursor cursor = null;
         try {
-            list = new ArrayList<String>();
+            beanList = new ArrayList<>();
             cursor = db.query("citylistinfo", null, null, null, null, null, null);
             if (cursor.moveToFirst()) {
                 do {
-                    list.add(cursor.getString(cursor.getColumnIndex("province_name")));
-                } while (cursor.moveToNext());
-            }
-            //去重
-            Set<String> set = new HashSet<String>();
-            for (int i = 0; i < list.size(); i++) {
-                set.add(list.get(i));
-            }
-            list.clear();
-            for (String str : set) {
-                list.add(str);
-            }
-            if (cursor != null) {
-                cursor.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 传入省份，读取出省份所在的城市列表
-     *
-     * @param prov
-     * @return
-     */
-    public List<String> loadCityData(String prov) {
-        Cursor cursor = null;
-        List<String> list = null;
-        try {
-            list = new ArrayList<String>();
-            cursor = db.query("citylistinfo", null, null, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                do {
-                    if (prov.equals(cursor.getString(cursor.getColumnIndex("province_name")))) {
-                        list.add(cursor.getString(cursor.getColumnIndex("city_name")));
-                    }
-                } while (cursor.moveToNext());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            return list;
-        }
-
-    }
-
-    /**
-     * 传入城市，读取出省份所在的城市的id
-     *
-     * @param city
-     * @return
-     */
-    public String loadCityCode(String city) {
-        String cityCode = null;
-        Cursor cursor = null;
-        try {
-            cursor = db.query("citylistinfo", null, null, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                do {
-                    if (city.equals(cursor.getString(cursor.getColumnIndex("city_name")))) {
-                        cityCode = cursor.getString(cursor.getColumnIndex("city_code"));
-                    }
+                    CityDetailBean bean = new CityDetailBean();
+                    bean.setProvince_name(cursor.getString(cursor.getColumnIndex("province_name")));
+                    bean.setCity_name(cursor.getString(cursor.getColumnIndex("city_name")));
+                    bean.setCity_code(cursor.getString(cursor.getColumnIndex("city_code")));
+                    beanList.add(bean);
                 } while (cursor.moveToNext());
             }
         } catch (Exception e) {
@@ -166,7 +89,7 @@ public class CityListHelper {
                 cursor.close();
             }
         }
-        return cityCode;
+        return beanList;
     }
 
     /**

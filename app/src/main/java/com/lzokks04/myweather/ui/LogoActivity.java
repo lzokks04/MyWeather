@@ -1,4 +1,4 @@
-package com.lzokks04.myweather.activity;
+package com.lzokks04.myweather.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
 import com.lzokks04.myweather.R;
+import com.lzokks04.myweather.view.activity.MainActivity;
 
 /**
  * Created by Liu on 2016/8/13.

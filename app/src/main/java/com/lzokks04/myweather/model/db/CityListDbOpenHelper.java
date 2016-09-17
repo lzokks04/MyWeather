@@ -1,4 +1,4 @@
-package com.lzokks04.myweather.db;
+package com.lzokks04.myweather.model.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

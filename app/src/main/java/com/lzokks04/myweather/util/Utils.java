@@ -1,8 +1,8 @@
 package com.lzokks04.myweather.util;
 
 import com.lzokks04.myweather.R;
-import com.lzokks04.myweather.bean.CityDetailBean;
-import com.lzokks04.myweather.bean.CityListBean;
+import com.lzokks04.myweather.model.bean.CityDetailBean;
+import com.lzokks04.myweather.model.bean.CityListBean;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,23 +15,6 @@ import java.util.Set;
  * Created by Liu on 2016/8/27.
  */
 public class Utils {
-
-    /**
-     * 由于城市天气json中字段含有违规字符，所以去除（空格，点，数字）
-     *
-     * @param str
-     * @return
-     */
-    public static String deleteErrData(String str) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < str.length(); i++) {
-            sb.append(str.charAt(i));
-        }
-        sb.deleteCharAt(11);
-        sb.deleteCharAt(15);
-        sb.delete(22, 26);
-        return sb.toString();
-    }
 
     /**
      * 获取今天是星期几
@@ -149,11 +132,12 @@ public class Utils {
 
     /**
      * 根据天气代码返回天气图片的int
+     *
      * @param code
      * @return
      */
-    public static int getWeatherIcon(String code){
-        switch (code){
+    public static int getWeatherIcon(String code) {
+        switch (code) {
             case "100":
                 return R.drawable.biz_plugin_weather_qing;
             case "101":
@@ -266,12 +250,13 @@ public class Utils {
 
     /**
      * 去掉最后更新时间的日期
+     *
      * @param str
      * @return
      */
-    public static String getLastTime(String str){
+    public static String getLastTime(String str) {
         StringBuffer sb = new StringBuffer();
-        for(int i=0;i<str.length();i++){
+        for (int i = 0; i < str.length(); i++) {
             sb.append(str.charAt(i));
         }
         sb.delete(0, 11);

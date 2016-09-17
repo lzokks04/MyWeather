@@ -1,9 +1,8 @@
-package com.lzokks04.myweather.activity;
+package com.lzokks04.myweather.view.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -18,21 +17,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lzokks04.myweather.R;
-import com.lzokks04.myweather.adapter.DaliyWeatherAdapter;
-import com.lzokks04.myweather.bean.CityWeatherBean;
-import com.lzokks04.myweather.bean.CityWeatherConBean;
-import com.lzokks04.myweather.bean.DailyWeather;
-import com.lzokks04.myweather.db.CityListHelper;
-import com.lzokks04.myweather.util.API;
+import com.lzokks04.myweather.model.bean.CityWeatherBean;
+import com.lzokks04.myweather.model.bean.CityWeatherConBean;
+import com.lzokks04.myweather.model.bean.DailyWeather;
+import com.lzokks04.myweather.model.db.CityListHelper;
+import com.lzokks04.myweather.model.http.JsonConverterFactory;
+import com.lzokks04.myweather.model.http.WeatherService;
+import com.lzokks04.myweather.ui.AboutActivity;
 import com.lzokks04.myweather.util.ActivityCollector;
+import com.lzokks04.myweather.util.Constants;
 import com.lzokks04.myweather.util.Utils;
-import com.lzokks04.myweather.util.retrofit.JsonConverterFactory;
-import com.lzokks04.myweather.util.retrofit.WeatherService;
+import com.lzokks04.myweather.view.adapter.DaliyWeatherAdapter;
 
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import it.sephiroth.android.library.picasso.Picasso;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -68,12 +67,15 @@ public class MainActivity extends BaseActivity {
     private String code;//城市代码
     private ProgressDialog progress;
 
-    private long exitTime = 0;//最后推出时间
+    private long exitTime = 0;//最后退出时间
+
+    @Override
+    protected int getLayout() {
+        return R.layout.activity_main;
+    }
 
     @Override
     protected void initialization() {
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
         tvDayOfWeek.setText(Utils.getDayOfWeek());
         helper = CityListHelper.getInstance(this);
         initToolBar();//初始化Toolbar
@@ -96,16 +98,13 @@ public class MainActivity extends BaseActivity {
      * 初始化Toolbar
      */
     private void initToolBar() {
-        mToolbar.setTitle("天气");
-        mToolbar.setTitleTextColor(Color.WHITE);
-        mToolbar.setNavigationIcon(R.drawable.ic_menu_white_18dp);
-        setSupportActionBar(mToolbar);
+        setToolBar(mToolbar, "天气");
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.refresh:
-                        getCityWeather(API.WEATHER, code, API.USER_ID);
+                        getCityWeather(Constants.WEATHER, code, Constants.USER_ID);
                         adapter.notifyDataSetChanged();
                         break;
                     case R.id.about:
@@ -118,8 +117,8 @@ public class MainActivity extends BaseActivity {
                 }
                 return true;
             }
-
         });
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -173,7 +172,7 @@ public class MainActivity extends BaseActivity {
         //从选择界面跳转过来
         if (cityCode != null) {
             pref.edit().putString("citycode", cityCode).commit();
-            getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+            getCityWeather(Constants.WEATHER, cityCode, Constants.USER_ID);
             //不是从选择界面跳转过来
         } else {
             //如果SharedPreferences里有城市代号+
@@ -183,11 +182,11 @@ public class MainActivity extends BaseActivity {
                 //如果过去1小时候进入app则自动更新天气
                 long lastTime = pref.getLong("lasttime", 0);
                 if (lastTime != 0 && System.currentTimeMillis() - lastTime >= 3600000) {
-                    getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                    getCityWeather(Constants.WEATHER, cityCode, Constants.USER_ID);
                 }
                 //如果数据库中没有数据的话
                 if (helper.loadDailyWeather().size() == 0) {
-                    getCityWeather(API.WEATHER, cityCode, API.USER_ID);
+                    getCityWeather(Constants.WEATHER, cityCode, Constants.USER_ID);
                 } else if (helper.loadDailyWeather().size() > 0) {
                     CityWeatherConBean bean = helper.loadCityWeather();
                     List<DailyWeather> beanList = helper.loadDailyWeather();
@@ -351,6 +350,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        getCityWeather(API.WEATHER, code, API.USER_ID);
+        getCityWeather(Constants.WEATHER, code, Constants.USER_ID);
     }
 }

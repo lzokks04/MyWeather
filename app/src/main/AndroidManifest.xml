@@ -11,12 +11,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".view.activity.MainActivity"
             android:launchMode="singleTask"
             />
 
         <activity
-            android:name=".activity.LogoActivity">
+            android:name=".ui.LogoActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -24,10 +24,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.SelectActivity"
+            android:name=".view.activity.SelectActivity"
             android:launchMode="singleTask"
             />
-        <activity android:name=".activity.AboutActivity"/>
+        <activity android:name=".ui.AboutActivity"/>
     </application>
 
 </manifest>

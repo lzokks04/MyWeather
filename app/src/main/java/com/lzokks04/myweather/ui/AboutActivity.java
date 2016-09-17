@@ -1,13 +1,12 @@
-package com.lzokks04.myweather.activity;
+package com.lzokks04.myweather.ui;
 
-import android.graphics.Color;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.lzokks04.myweather.R;
+import com.lzokks04.myweather.view.activity.BaseActivity;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * 关于界面
@@ -19,17 +18,13 @@ public class AboutActivity extends BaseActivity {
     Toolbar toolbar;
 
     @Override
-    protected void initialization() {
-        setContentView(R.layout.activity_about);
-        ButterKnife.bind(this);
-        initToolbar();
+    protected int getLayout() {
+        return R.layout.activity_about;
     }
 
-    private void initToolbar() {
-        toolbar.setTitle("关于");
-        toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_18dp);
-        setSupportActionBar(toolbar);
+    @Override
+    protected void initialization() {
+        setToolBar(toolbar, "关于");
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
